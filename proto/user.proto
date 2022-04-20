@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package = "./gen";
+
+message UserRequest{
+	string username = 1;
+	string password = 2;
+}
+
+message UserResponse{
+	uint64 id = 1;
+	string username = 2;
+}
+
+service UserService{
+	rpc CreateUser(UserRequest) returns (UserResponse) {}
+}
