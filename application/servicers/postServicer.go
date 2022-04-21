@@ -18,6 +18,9 @@ func NewPostServicer(repository *repositories.PostRepository) *PostServicer {
 
 func (p *PostServicer) CreatePost(in *gen.PostRequest) (*gen.PostResponse, error) {
 	post := models.NewPost(in)
+	if err := post.Validate(); err != nil {
+		return nil, err
+	}
 
 	err := p.repository.CreatePost(post)
 	if err != nil {

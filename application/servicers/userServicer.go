@@ -18,6 +18,9 @@ func NewUserServicer(repository *repositories.UserRepository) *UserServicer {
 
 func (s *UserServicer) CreateUser(in *gen.UserRequest) (*gen.UserResponse, error) {
 	user := models.NewUser(in)
+	if err := user.Validate(); err != nil {
+		return nil, err
+	}
 
 	err := s.repository.CreateUser(user)
 	if err != nil {
