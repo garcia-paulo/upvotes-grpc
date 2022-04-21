@@ -4,12 +4,13 @@
 package main
 
 import (
+	"github.com/garcia-paulo/upvotes-grpc/application/servicers"
+	"github.com/garcia-paulo/upvotes-grpc/infra/config"
+	"github.com/garcia-paulo/upvotes-grpc/infra/database"
+	"github.com/garcia-paulo/upvotes-grpc/infra/repositories"
+	"github.com/garcia-paulo/upvotes-grpc/presentation"
+	"github.com/garcia-paulo/upvotes-grpc/presentation/servers"
 	"github.com/google/wire"
-	"github.com/upvotes-grpc/garcia-paulo/infra/config"
-	"github.com/upvotes-grpc/garcia-paulo/infra/database"
-	"github.com/upvotes-grpc/garcia-paulo/infra/repositories"
-	"github.com/upvotes-grpc/garcia-paulo/presentation"
-	"github.com/upvotes-grpc/garcia-paulo/presentation/servers"
 )
 
 func InitializeServer() *presentation.Server {
@@ -17,7 +18,11 @@ func InitializeServer() *presentation.Server {
 		config.NewConfig,
 		database.NewDatabase,
 		repositories.NewUserRepository,
+		repositories.NewPostRepository,
+		servicers.NewUserServicer,
+		servicers.NewPostServicer,
 		servers.NewUserServer,
+		servers.NewPostServer,
 		presentation.NewServer,
 	))
 }

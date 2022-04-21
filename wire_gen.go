@@ -7,11 +7,12 @@
 package main
 
 import (
-	"github.com/upvotes-grpc/garcia-paulo/infra/config"
-	"github.com/upvotes-grpc/garcia-paulo/infra/database"
-	"github.com/upvotes-grpc/garcia-paulo/infra/repositories"
-	"github.com/upvotes-grpc/garcia-paulo/presentation"
-	"github.com/upvotes-grpc/garcia-paulo/presentation/servers"
+	"github.com/garcia-paulo/upvotes-grpc/application/servicers"
+	"github.com/garcia-paulo/upvotes-grpc/infra/config"
+	"github.com/garcia-paulo/upvotes-grpc/infra/database"
+	"github.com/garcia-paulo/upvotes-grpc/infra/repositories"
+	"github.com/garcia-paulo/upvotes-grpc/presentation"
+	"github.com/garcia-paulo/upvotes-grpc/presentation/servers"
 )
 
 // Injectors from wire.go:
@@ -20,7 +21,11 @@ func InitializeServer() *presentation.Server {
 	configConfig := config.NewConfig()
 	databaseDatabase := database.NewDatabase(configConfig)
 	userRepository := repositories.NewUserRepository(databaseDatabase)
-	userServer := servers.NewUserServer(userRepository)
-	server := presentation.NewServer(userServer, configConfig)
+	userServicer := servicers.NewUserServicer(userRepository)
+	userServer := servers.NewUserServer(userServicer)
+	postRepository := repositories.NewPostRepository(databaseDatabase)
+	postServicer := servicers.NewPostServicer(postRepository)
+	postServer := servers.NewPostServer(postServicer)
+	server := presentation.NewServer(userServer, configConfig, postServer)
 	return server
 }

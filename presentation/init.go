@@ -3,33 +3,36 @@ package presentation
 import (
 	"net"
 
-	"github.com/upvotes-grpc/garcia-paulo/infra/config"
-	"github.com/upvotes-grpc/garcia-paulo/presentation/servers"
-	"github.com/upvotes-grpc/garcia-paulo/proto/gen"
+	"github.com/garcia-paulo/upvotes-grpc/infra/config"
+	"github.com/garcia-paulo/upvotes-grpc/presentation/servers"
+	"github.com/garcia-paulo/upvotes-grpc/proto/gen"
 	"google.golang.org/grpc"
 )
 
 type Server struct {
-	UserServer *servers.UserServer
-	Config     *config.Config
+	userServer *servers.UserServer
+	postServer *servers.PostServer
+	config     *config.Config
 }
 
-func NewServer(userServer *servers.UserServer, config *config.Config) *Server {
+func NewServer(userServer *servers.UserServer, config *config.Config, postServer *servers.PostServer) *Server {
 	return &Server{
-		UserServer: userServer,
-		Config:     config,
+		postServer: postServer,
+		userServer: userServer,
+		config:     config,
 	}
 }
 
 func (s *Server) RegisterServers(grpcServer *grpc.Server) {
-	gen.RegisterUserServiceServer(grpcServer, s.UserServer)
+	gen.RegisterUserServiceServer(grpcServer, s.userServer)
+	gen.RegisterPostServiceServer(grpcServer, s.postServer)
 }
 
 func (s *Server) Run(grpcServer *grpc.Server) {
 
 	s.RegisterServers(grpcServer)
 
-	listener, err := net.Listen("tcp", s.Config.ServerPort)
+	listener, err := net.Listen("tcp", s.config.ServerPort)
 	if err != nil {
 		panic(err)
 	}

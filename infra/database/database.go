@@ -3,7 +3,7 @@ package database
 import (
 	"context"
 
-	"github.com/upvotes-grpc/garcia-paulo/infra/config"
+	"github.com/garcia-paulo/upvotes-grpc/infra/config"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -11,7 +11,7 @@ import (
 type Database struct {
 	Ctx      context.Context
 	Database *mongo.Database
-	Config   *config.Config
+	config   *config.Config
 }
 
 func NewDatabase(config *config.Config) *Database {

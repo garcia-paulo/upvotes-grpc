@@ -3,12 +3,13 @@ option go_package = "./gen";
 
 message PostRequest{
 	string title = 1;
-	string text = 2;
+	string body = 2;
 }
 
 message PostResponse{
-	string title = 1;
-	string text = 2;
+	string id = 1;
+	string title = 2;
+	string body = 3;
 }
 
 service PostService{

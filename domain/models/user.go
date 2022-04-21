@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/upvotes-grpc/garcia-paulo/proto/gen"
+	"github.com/garcia-paulo/upvotes-grpc/proto/gen"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
