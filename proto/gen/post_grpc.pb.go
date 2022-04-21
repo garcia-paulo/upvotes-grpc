@@ -23,6 +23,8 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type PostServiceClient interface {
 	CreatePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*PostResponse, error)
+	GetPosts(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ManyPostsResponse, error)
+	ToggleUpvote(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*PostResponse, error)
 }
 
 type postServiceClient struct {
@@ -42,11 +44,31 @@ func (c *postServiceClient) CreatePost(ctx context.Context, in *PostRequest, opt
 	return out, nil
 }
 
+func (c *postServiceClient) GetPosts(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ManyPostsResponse, error) {
+	out := new(ManyPostsResponse)
+	err := c.cc.Invoke(ctx, "/PostService/GetPosts", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *postServiceClient) ToggleUpvote(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*PostResponse, error) {
+	out := new(PostResponse)
+	err := c.cc.Invoke(ctx, "/PostService/ToggleUpvote", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // PostServiceServer is the server API for PostService service.
 // All implementations must embed UnimplementedPostServiceServer
 // for forward compatibility
 type PostServiceServer interface {
 	CreatePost(context.Context, *PostRequest) (*PostResponse, error)
+	GetPosts(context.Context, *Empty) (*ManyPostsResponse, error)
+	ToggleUpvote(context.Context, *UserRequest) (*PostResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -56,6 +78,12 @@ type UnimplementedPostServiceServer struct {
 
 func (UnimplementedPostServiceServer) CreatePost(context.Context, *PostRequest) (*PostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePost not implemented")
+}
+func (UnimplementedPostServiceServer) GetPosts(context.Context, *Empty) (*ManyPostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPosts not implemented")
+}
+func (UnimplementedPostServiceServer) ToggleUpvote(context.Context, *UserRequest) (*PostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ToggleUpvote not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
 
@@ -88,6 +116,42 @@ func _PostService_CreatePost_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _PostService_GetPosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).GetPosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PostService/GetPosts",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).GetPosts(ctx, req.(*Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _PostService_ToggleUpvote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(PostServiceServer).ToggleUpvote(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/PostService/ToggleUpvote",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(PostServiceServer).ToggleUpvote(ctx, req.(*UserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // PostService_ServiceDesc is the grpc.ServiceDesc for PostService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -98,6 +162,14 @@ var PostService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreatePost",
 			Handler:    _PostService_CreatePost_Handler,
+		},
+		{
+			MethodName: "GetPosts",
+			Handler:    _PostService_GetPosts_Handler,
+		},
+		{
+			MethodName: "ToggleUpvote",
+			Handler:    _PostService_ToggleUpvote_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

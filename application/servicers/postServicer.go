@@ -29,3 +29,12 @@ func (p *PostServicer) CreatePost(in *gen.PostRequest) (*gen.PostResponse, error
 
 	return models.NewPostResponse(post), nil
 }
+
+func (p *PostServicer) GetPosts() (*gen.ManyPostsResponse, error) {
+	posts, err := p.repository.GetPosts()
+	if err != nil {
+		return nil, err
+	}
+
+	return models.NewManyPostsResponse(posts), nil
+}

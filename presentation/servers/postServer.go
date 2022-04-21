@@ -28,3 +28,12 @@ func (s *PostServer) CreatePost(ctx context.Context, in *gen.PostRequest) (*gen.
 
 	return response, nil
 }
+
+func (s *PostServer) GetPosts(ctx context.Context, in *gen.Empty) (*gen.ManyPostsResponse, error) {
+	response, err := s.servicer.GetPosts()
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
