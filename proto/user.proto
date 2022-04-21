@@ -7,7 +7,7 @@ message UserRequest{
 }
 
 message UserResponse{
-	uint64 id = 1;
+	string id = 1;
 	string username = 2;
 }
 
