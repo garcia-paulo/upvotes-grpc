@@ -8,12 +8,14 @@ import (
 )
 
 type PostServicer struct {
-	repository *repositories.PostRepository
+	postRepository *repositories.PostRepository
+	userRepository *repositories.UserRepository
 }
 
-func NewPostServicer(repository *repositories.PostRepository) *PostServicer {
+func NewPostServicer(postRepository *repositories.PostRepository, userRepository *repositories.UserRepository) *PostServicer {
 	return &PostServicer{
-		repository: repository,
+		postRepository: postRepository,
+		userRepository: userRepository,
 	}
 }
 
@@ -23,7 +25,7 @@ func (p *PostServicer) CreatePost(in *gen.PostRequest) (*gen.PostResponse, error
 		return nil, err
 	}
 
-	err := p.repository.CreatePost(post)
+	err := p.postRepository.CreatePost(post)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +34,7 @@ func (p *PostServicer) CreatePost(in *gen.PostRequest) (*gen.PostResponse, error
 }
 
 func (p *PostServicer) GetPosts() (*gen.ManyPostsResponse, error) {
-	posts, err := p.repository.GetPosts()
+	posts, err := p.postRepository.GetPosts()
 	if err != nil {
 		return nil, err
 	}
@@ -45,28 +47,28 @@ func (p *PostServicer) ToggleUpvote(in *gen.PostUserIdRequest) (*gen.PostRespons
 	if err != nil {
 		return nil, err
 	}
-	userId, err := primitive.ObjectIDFromHex(in.UserId)
+
+	post, err := p.postRepository.GetPostById(postId)
 	if err != nil {
 		return nil, err
 	}
 
-	post, err := p.repository.GetPostById(postId)
-	if err != nil {
+	if _, err := p.userRepository.FindUserByUsername(in.Username); err != nil {
 		return nil, err
 	}
 
 	upvoteFound := false
 	for _, upvote := range post.Upvotes {
-		if upvote == userId {
+		if upvote == in.Username {
 			upvoteFound = true
 			break
 		}
 	}
 
 	if upvoteFound {
-		err = p.repository.RemoveUpvote(post, userId)
+		err = p.postRepository.RemoveUpvote(post, in.Username)
 	} else {
-		err = p.repository.AddUpvote(post, userId)
+		err = p.postRepository.AddUpvote(post, in.Username)
 	}
 	if err != nil {
 		return nil, err

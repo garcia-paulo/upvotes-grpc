@@ -24,7 +24,7 @@ func InitializeServer() *presentation.Server {
 	userServicer := servicers.NewUserServicer(userRepository)
 	userServer := servers.NewUserServer(userServicer)
 	postRepository := repositories.NewPostRepository(databaseDatabase)
-	postServicer := servicers.NewPostServicer(postRepository)
+	postServicer := servicers.NewPostServicer(postRepository, userRepository)
 	postServer := servers.NewPostServer(postServicer)
 	server := presentation.NewServer(userServer, configConfig, postServer)
 	return server

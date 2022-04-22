@@ -7,10 +7,10 @@ import (
 )
 
 type Post struct {
-	ID      primitive.ObjectID   `bson:"_id"`
-	Title   string               `bson:"title" validate:"min=6,max=18"`
-	Body    string               `bson:"body" validate:"max=280,nonzero"`
-	Upvotes []primitive.ObjectID `bson:"upvotes,omitempty"`
+	ID      primitive.ObjectID `bson:"_id"`
+	Title   string             `bson:"title" validate:"min=6,max=18"`
+	Body    string             `bson:"body" validate:"max=280,nonzero"`
+	Upvotes []string           `bson:"upvotes,omitempty"`
 }
 
 func NewPost(request *gen.PostRequest) *Post {
@@ -28,7 +28,7 @@ func NewPostResponse(post *Post) *gen.PostResponse {
 		Body:  post.Body,
 	}
 	for _, upvote := range post.Upvotes {
-		response.Upvotes = append(response.Upvotes, upvote.Hex())
+		response.Upvotes = append(response.Upvotes, upvote)
 	}
 	return response
 }

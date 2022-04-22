@@ -21,7 +21,7 @@ message ManyPostsResponse{
 
 message PostUserIdRequest{
 	string postId = 1;
-	string userId = 2;
+	string username = 2;
 }
 
 service PostService{
