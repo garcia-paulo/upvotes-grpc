@@ -30,3 +30,12 @@ func (s *UserServer) CreateUser(ctx context.Context, in *gen.UserRequest) (*gen.
 
 	return response, nil
 }
+
+func (s *UserServer) Login(ctx context.Context, in *gen.UserRequest) (*gen.UserResponse, error) {
+	response, err := s.servicer.Login(in)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}

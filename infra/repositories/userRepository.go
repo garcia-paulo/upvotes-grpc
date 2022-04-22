@@ -2,10 +2,11 @@ package repositories
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/garcia-paulo/upvotes-grpc/domain/models"
 	"github.com/garcia-paulo/upvotes-grpc/infra/database"
-	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -21,8 +22,16 @@ func NewUserRepository(database *database.Database) *UserRepository {
 	}
 }
 
+func (u *UserRepository) FindUserByUsername(username string) (*models.User, error) {
+	var user models.User
+	err := u.users.FindOne(u.ctx, bson.M{"username": username}).Decode(&user)
+	return &user, err
+}
+
 func (u *UserRepository) CreateUser(user *models.User) error {
-	result, err := u.users.InsertOne(u.ctx, user)
-	user.ID = result.InsertedID.(primitive.ObjectID)
+	if _, err := u.FindUserByUsername(user.Username); err == nil {
+		return fmt.Errorf("user with username %s already exists", user.Username)
+	}
+	_, err := u.users.InsertOne(u.ctx, user)
 	return err
 }

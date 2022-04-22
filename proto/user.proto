@@ -7,10 +7,10 @@ message UserRequest{
 }
 
 message UserResponse{
-	string id = 1;
 	string username = 2;
 }
 
 service UserService{
 	rpc CreateUser(UserRequest) returns (UserResponse) {}
+	rpc Login(UserRequest) returns (UserResponse) {}
 }

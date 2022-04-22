@@ -3,13 +3,14 @@ package models
 import (
 	"github.com/garcia-paulo/upvotes-grpc/proto/gen"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/crypto/bcrypt"
 	"gopkg.in/validator.v2"
 )
 
 type User struct {
 	ID             primitive.ObjectID `bson:"_id"`
-	Username       string             `bson:"name" validate:"regexp=^[a-zA-Z0-9.-_]+$,min=4,max=12"`
-	HashedPassword string             `bson:"hashed_password"`
+	Username       string             `bson:"username" validate:"regexp=^[a-zA-Z0-9.-_]+$,min=4,max=12"`
+	HashedPassword string             `bson:"hashed_password" validate:"regexp=^[a-zA-Z0-9.-_@#]+$,min=6,max=18"`
 }
 
 func NewUser(request *gen.UserRequest) *User {
@@ -20,9 +21,24 @@ func NewUser(request *gen.UserRequest) *User {
 	}
 }
 
+func (u *User) Authenticate(password string) error {
+	err := bcrypt.CompareHashAndPassword([]byte(u.HashedPassword), []byte(password))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func HashPassword(password string) (string, error) {
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return "", err
+	}
+	return string(hashedPassword), nil
+}
+
 func NewUserResponse(user *User) *gen.UserResponse {
 	return &gen.UserResponse{
-		Id:       user.ID.Hex(),
 		Username: user.Username,
 	}
 }
