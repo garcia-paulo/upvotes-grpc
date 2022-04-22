@@ -8,3 +8,7 @@ message Empty{
 message Message{
 	string message = 1;
 }
+
+message IdRequest{
+	string id = 1;
+}

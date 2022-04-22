@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type PostServiceClient interface {
 	CreatePost(ctx context.Context, in *PostRequest, opts ...grpc.CallOption) (*PostResponse, error)
 	GetPosts(ctx context.Context, in *Empty, opts ...grpc.CallOption) (*ManyPostsResponse, error)
-	ToggleUpvote(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*PostResponse, error)
+	ToggleUpvote(ctx context.Context, in *PostUserIdRequest, opts ...grpc.CallOption) (*PostResponse, error)
 }
 
 type postServiceClient struct {
@@ -53,7 +53,7 @@ func (c *postServiceClient) GetPosts(ctx context.Context, in *Empty, opts ...grp
 	return out, nil
 }
 
-func (c *postServiceClient) ToggleUpvote(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*PostResponse, error) {
+func (c *postServiceClient) ToggleUpvote(ctx context.Context, in *PostUserIdRequest, opts ...grpc.CallOption) (*PostResponse, error) {
 	out := new(PostResponse)
 	err := c.cc.Invoke(ctx, "/PostService/ToggleUpvote", in, out, opts...)
 	if err != nil {
@@ -68,7 +68,7 @@ func (c *postServiceClient) ToggleUpvote(ctx context.Context, in *UserRequest, o
 type PostServiceServer interface {
 	CreatePost(context.Context, *PostRequest) (*PostResponse, error)
 	GetPosts(context.Context, *Empty) (*ManyPostsResponse, error)
-	ToggleUpvote(context.Context, *UserRequest) (*PostResponse, error)
+	ToggleUpvote(context.Context, *PostUserIdRequest) (*PostResponse, error)
 	mustEmbedUnimplementedPostServiceServer()
 }
 
@@ -82,7 +82,7 @@ func (UnimplementedPostServiceServer) CreatePost(context.Context, *PostRequest) 
 func (UnimplementedPostServiceServer) GetPosts(context.Context, *Empty) (*ManyPostsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPosts not implemented")
 }
-func (UnimplementedPostServiceServer) ToggleUpvote(context.Context, *UserRequest) (*PostResponse, error) {
+func (UnimplementedPostServiceServer) ToggleUpvote(context.Context, *PostUserIdRequest) (*PostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ToggleUpvote not implemented")
 }
 func (UnimplementedPostServiceServer) mustEmbedUnimplementedPostServiceServer() {}
@@ -135,7 +135,7 @@ func _PostService_GetPosts_Handler(srv interface{}, ctx context.Context, dec fun
 }
 
 func _PostService_ToggleUpvote_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserRequest)
+	in := new(PostUserIdRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func _PostService_ToggleUpvote_Handler(srv interface{}, ctx context.Context, dec
 		FullMethod: "/PostService/ToggleUpvote",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PostServiceServer).ToggleUpvote(ctx, req.(*UserRequest))
+		return srv.(PostServiceServer).ToggleUpvote(ctx, req.(*PostUserIdRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -46,3 +46,26 @@ func (p *PostRepository) GetPosts() ([]*models.Post, error) {
 
 	return posts, nil
 }
+
+func (p *PostRepository) GetPostById(id primitive.ObjectID) (*models.Post, error) {
+	post := &models.Post{}
+	err := p.posts.FindOne(p.ctx, bson.M{"_id": id}).Decode(post)
+	return post, err
+}
+
+func (p *PostRepository) RemoveUpvote(post *models.Post, userId primitive.ObjectID) error {
+	_, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$pull": bson.M{"upvotes": userId}})
+	if err != nil {
+		return err
+	}
+
+	update, err := p.GetPostById(post.ID)
+	post.Upvotes = update.Upvotes
+	return err
+}
+
+func (p *PostRepository) AddUpvote(post *models.Post, userId primitive.ObjectID) error {
+	_, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$addToSet": bson.M{"upvotes": userId}})
+	post.Upvotes = append(post.Upvotes, userId)
+	return err
+}

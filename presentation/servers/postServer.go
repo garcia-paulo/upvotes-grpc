@@ -37,3 +37,12 @@ func (s *PostServer) GetPosts(ctx context.Context, in *gen.Empty) (*gen.ManyPost
 
 	return response, nil
 }
+
+func (s *PostServer) ToggleUpvote(ctx context.Context, in *gen.PostUserIdRequest) (*gen.PostResponse, error) {
+	response, err := s.servicer.ToggleUpvote(in)
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}
