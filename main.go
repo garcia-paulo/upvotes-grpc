@@ -6,5 +6,7 @@ import (
 
 func main() {
 	server := InitializeServer()
-	server.Run(grpc.NewServer(grpc.UnaryInterceptor(server.AuthInterceptor.UnaryInterceptor)))
+	grpcServer := grpc.NewServer(grpc.UnaryInterceptor(server.AuthInterceptor.UnaryInterceptor))
+	server.RegisterServers(grpcServer)
+	server.Run(grpcServer)
 }

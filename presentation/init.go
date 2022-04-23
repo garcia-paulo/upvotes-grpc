@@ -11,30 +11,27 @@ import (
 )
 
 type Server struct {
-	userServer      *servers.UserServer
-	postServer      *servers.PostServer
+	UserServer      *servers.UserServer
+	PostServer      *servers.PostServer
 	AuthInterceptor *interceptors.AuthInterceptor
 	config          *config.Config
 }
 
 func NewServer(userServer *servers.UserServer, config *config.Config, postServer *servers.PostServer, authInterceptor *interceptors.AuthInterceptor) *Server {
 	return &Server{
-		postServer:      postServer,
-		userServer:      userServer,
+		PostServer:      postServer,
+		UserServer:      userServer,
 		AuthInterceptor: authInterceptor,
 		config:          config,
 	}
 }
 
 func (s *Server) RegisterServers(grpcServer *grpc.Server) {
-	gen.RegisterUserServiceServer(grpcServer, s.userServer)
-	gen.RegisterPostServiceServer(grpcServer, s.postServer)
+	gen.RegisterUserServiceServer(grpcServer, s.UserServer)
+	gen.RegisterPostServiceServer(grpcServer, s.PostServer)
 }
 
 func (s *Server) Run(grpcServer *grpc.Server) {
-
-	s.RegisterServers(grpcServer)
-
 	listener, err := net.Listen("tcp", s.config.ServerPort)
 	if err != nil {
 		panic(err)
