@@ -8,21 +8,29 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type PostRepository struct {
-	posts *mongo.Collection
-	ctx   context.Context
+	posts          *mongo.Collection
+	userRepository *UserRepository
+	ctx            context.Context
 }
 
-func NewPostRepository(database *database.Database) *PostRepository {
+func NewPostRepository(database *database.Database, userRepository *UserRepository) *PostRepository {
 	return &PostRepository{
-		posts: database.Database.Collection("posts"),
-		ctx:   database.Ctx,
+		posts:          database.Database.Collection("posts"),
+		userRepository: userRepository,
+		ctx:            database.Ctx,
 	}
 }
 
 func (p *PostRepository) CreatePost(post *models.Post) error {
+	if _, err := p.userRepository.FindUserByUsername(post.Author); err != nil {
+		return status.Errorf(codes.NotFound, "user with username %s not found", post.Author)
+	}
+
 	result, err := p.posts.InsertOne(p.ctx, post)
 	post.ID = result.InsertedID.(primitive.ObjectID)
 	return err
@@ -65,6 +73,10 @@ func (p *PostRepository) RemoveUpvote(post *models.Post, username string) error 
 }
 
 func (p *PostRepository) AddUpvote(post *models.Post, username string) error {
+	if _, err := p.userRepository.FindUserByUsername(username); err != nil {
+		return status.Errorf(codes.NotFound, "user with username %s not found", username)
+	}
+
 	_, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$addToSet": bson.M{"upvotes": username}})
 	post.Upvotes = append(post.Upvotes, username)
 	return err

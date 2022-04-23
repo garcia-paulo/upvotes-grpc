@@ -7,7 +7,9 @@
 package main
 
 import (
+	"github.com/garcia-paulo/upvotes-grpc/application/interceptors"
 	"github.com/garcia-paulo/upvotes-grpc/application/servicers"
+	"github.com/garcia-paulo/upvotes-grpc/application/token"
 	"github.com/garcia-paulo/upvotes-grpc/infra/config"
 	"github.com/garcia-paulo/upvotes-grpc/infra/database"
 	"github.com/garcia-paulo/upvotes-grpc/infra/repositories"
@@ -21,11 +23,13 @@ func InitializeServer() *presentation.Server {
 	configConfig := config.NewConfig()
 	databaseDatabase := database.NewDatabase(configConfig)
 	userRepository := repositories.NewUserRepository(databaseDatabase)
-	userServicer := servicers.NewUserServicer(userRepository)
+	tokenMaker := token.NewTokenMaker(configConfig)
+	userServicer := servicers.NewUserServicer(userRepository, tokenMaker)
 	userServer := servers.NewUserServer(userServicer)
-	postRepository := repositories.NewPostRepository(databaseDatabase)
-	postServicer := servicers.NewPostServicer(postRepository, userRepository)
+	postRepository := repositories.NewPostRepository(databaseDatabase, userRepository)
+	postServicer := servicers.NewPostServicer(postRepository)
 	postServer := servers.NewPostServer(postServicer)
-	server := presentation.NewServer(userServer, configConfig, postServer)
+	authInterceptor := interceptors.NewAuthInterceptor(tokenMaker)
+	server := presentation.NewServer(userServer, configConfig, postServer, authInterceptor)
 	return server
 }

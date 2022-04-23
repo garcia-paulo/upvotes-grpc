@@ -37,9 +37,10 @@ func HashPassword(password string) (string, error) {
 	return string(hashedPassword), nil
 }
 
-func NewUserResponse(user *User) *gen.UserResponse {
+func NewUserResponse(user *User, token string) *gen.UserResponse {
 	return &gen.UserResponse{
 		Username: user.Username,
+		Token:    token,
 	}
 }
 

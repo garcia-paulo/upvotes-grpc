@@ -2,12 +2,13 @@ package repositories
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/garcia-paulo/upvotes-grpc/domain/models"
 	"github.com/garcia-paulo/upvotes-grpc/infra/database"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 type UserRepository struct {
@@ -30,7 +31,7 @@ func (u *UserRepository) FindUserByUsername(username string) (*models.User, erro
 
 func (u *UserRepository) CreateUser(user *models.User) error {
 	if _, err := u.FindUserByUsername(user.Username); err == nil {
-		return fmt.Errorf("user with username %s already exists", user.Username)
+		return status.Errorf(codes.AlreadyExists, "user with username %s already exists", user.Username)
 	}
 	_, err := u.users.InsertOne(u.ctx, user)
 	return err

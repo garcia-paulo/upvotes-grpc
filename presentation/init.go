@@ -3,6 +3,7 @@ package presentation
 import (
 	"net"
 
+	"github.com/garcia-paulo/upvotes-grpc/application/interceptors"
 	"github.com/garcia-paulo/upvotes-grpc/infra/config"
 	"github.com/garcia-paulo/upvotes-grpc/presentation/servers"
 	"github.com/garcia-paulo/upvotes-grpc/proto/gen"
@@ -10,16 +11,18 @@ import (
 )
 
 type Server struct {
-	userServer *servers.UserServer
-	postServer *servers.PostServer
-	config     *config.Config
+	userServer      *servers.UserServer
+	postServer      *servers.PostServer
+	AuthInterceptor *interceptors.AuthInterceptor
+	config          *config.Config
 }
 
-func NewServer(userServer *servers.UserServer, config *config.Config, postServer *servers.PostServer) *Server {
+func NewServer(userServer *servers.UserServer, config *config.Config, postServer *servers.PostServer, authInterceptor *interceptors.AuthInterceptor) *Server {
 	return &Server{
-		postServer: postServer,
-		userServer: userServer,
-		config:     config,
+		postServer:      postServer,
+		userServer:      userServer,
+		AuthInterceptor: authInterceptor,
+		config:          config,
 	}
 }
 

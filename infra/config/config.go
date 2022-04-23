@@ -1,10 +1,16 @@
 package config
 
-import "github.com/spf13/viper"
+import (
+	"time"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
-	ServerPort string `mapstructure:"SERVER_PORT"`
-	DBSource   string `mapstructure:"DB_SOURCE"`
+	ServerPort    string        `mapstructure:"SERVER_PORT"`
+	DBSource      string        `mapstructure:"DB_SOURCE"`
+	TokenKey      string        `mapstructure:"TOKEN_KEY"`
+	TokenDuration time.Duration `mapstructure:"TOKEN_DURATION"`
 }
 
 func NewConfig() *Config {

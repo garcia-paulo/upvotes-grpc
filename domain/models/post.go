@@ -11,21 +11,24 @@ type Post struct {
 	Title   string             `bson:"title" validate:"min=6,max=18"`
 	Body    string             `bson:"body" validate:"max=280,nonzero"`
 	Upvotes []string           `bson:"upvotes,omitempty"`
+	Author  string             `bson:"author" validate:"nonzero"`
 }
 
-func NewPost(request *gen.PostRequest) *Post {
+func NewPost(request *gen.PostRequest, username string) *Post {
 	return &Post{
-		ID:    primitive.NewObjectID(),
-		Title: request.Title,
-		Body:  request.Body,
+		ID:     primitive.NewObjectID(),
+		Title:  request.Title,
+		Body:   request.Body,
+		Author: username,
 	}
 }
 
 func NewPostResponse(post *Post) *gen.PostResponse {
 	response := &gen.PostResponse{
-		Id:    post.ID.Hex(),
-		Title: post.Title,
-		Body:  post.Body,
+		Id:     post.ID.Hex(),
+		Title:  post.Title,
+		Body:   post.Body,
+		Author: post.Author,
 	}
 	for _, upvote := range post.Upvotes {
 		response.Upvotes = append(response.Upvotes, upvote)

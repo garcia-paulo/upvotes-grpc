@@ -21,7 +21,7 @@ func NewPostServer(servicer *servicers.PostServicer) *PostServer {
 func (s *PostServer) mustEmbedUnimplementedPostServiceServer() {}
 
 func (s *PostServer) CreatePost(ctx context.Context, in *gen.PostRequest) (*gen.PostResponse, error) {
-	response, err := s.servicer.CreatePost(in)
+	response, err := s.servicer.CreatePost(in, ctx.Value("username").(string))
 	if err != nil {
 		return nil, err
 	}
@@ -38,8 +38,8 @@ func (s *PostServer) GetPosts(ctx context.Context, in *gen.Empty) (*gen.ManyPost
 	return response, nil
 }
 
-func (s *PostServer) ToggleUpvote(ctx context.Context, in *gen.PostUserIdRequest) (*gen.PostResponse, error) {
-	response, err := s.servicer.ToggleUpvote(in)
+func (s *PostServer) ToggleUpvote(ctx context.Context, in *gen.PostIdRequest) (*gen.PostResponse, error) {
+	response, err := s.servicer.ToggleUpvote(in, ctx.Value("username").(string))
 	if err != nil {
 		return nil, err
 	}
