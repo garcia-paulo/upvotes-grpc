@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "./gen";
+option go_package = "github.com/garcia-paulo/upvotes-grpc/server/proto/gen";
 
 import "default.proto";
 
@@ -25,7 +25,7 @@ message ManyPostsResponse{
 }
 
 service PostService{
-	rpc CreatePost(PostRequest) returns (PostResponse) {}
 	rpc GetPosts(Empty) returns (ManyPostsResponse) {}
+	rpc CreatePost(PostRequest) returns (PostResponse) {}
 	rpc ToggleUpvote(PostIdRequest) returns (PostResponse) {}
 }
