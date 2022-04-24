@@ -25,16 +25,24 @@ func InitTestSetup() {
 	posts = database.Database.Collection("posts")
 }
 
+var (
+	mockUser = &gen.UserRequest{
+		Username: "test.user",
+		Password: "testPassword",
+	}
+	mockPost = &gen.PostRequest{
+		Title: "testTitle",
+		Body:  "testContent",
+	}
+)
+
 func TestCreateUser(t *testing.T) {
 	InitTestSetup()
 	ctx := context.Background()
 	users.DeleteOne(ctx, bson.M{"username": "test.user"})
 
 	t.Run("CreateUserSuccess", func(t *testing.T) {
-		_, err := server.UserServer.CreateUser(ctx, &gen.UserRequest{
-			Username: "test.user",
-			Password: "testPassword",
-		})
+		_, err := server.UserServer.CreateUser(ctx, mockUser)
 
 		if err != nil {
 			t.Errorf("Error: %v", err)
@@ -42,10 +50,7 @@ func TestCreateUser(t *testing.T) {
 	})
 
 	t.Run("CreateUserDuplicateFail", func(t *testing.T) {
-		_, err := server.UserServer.CreateUser(ctx, &gen.UserRequest{
-			Username: "test.user",
-			Password: "testPassword",
-		})
+		_, err := server.UserServer.CreateUser(ctx, mockUser)
 
 		if err == nil {
 			t.Errorf("Error: duclicate user should not be created")
@@ -81,16 +86,10 @@ func TestLogin(t *testing.T) {
 	InitTestSetup()
 	ctx := context.Background()
 	users.DeleteOne(ctx, bson.M{"username": "test.user"})
-	server.UserServer.CreateUser(ctx, &gen.UserRequest{
-		Username: "test.user",
-		Password: "testPassword",
-	})
+	server.UserServer.CreateUser(ctx, mockUser)
 
 	t.Run("LoginSuccess", func(t *testing.T) {
-		_, err := server.UserServer.Login(ctx, &gen.UserRequest{
-			Username: "test.user",
-			Password: "testPassword",
-		})
+		_, err := server.UserServer.Login(ctx, mockUser)
 
 		if err != nil {
 			t.Errorf("Error: %v", err)
@@ -139,16 +138,10 @@ func TestCreatePost(t *testing.T) {
 	InitTestSetup()
 	ctx := context.WithValue(context.Background(), "username", "test.user")
 	users.DeleteOne(ctx, bson.M{"username": "test.user"})
-	server.UserServer.CreateUser(ctx, &gen.UserRequest{
-		Username: "test.user",
-		Password: "testPassword",
-	})
+	server.UserServer.CreateUser(ctx, mockUser)
 
 	t.Run("CreatePostSuccess", func(t *testing.T) {
-		_, err := server.PostServer.CreatePost(ctx, &gen.PostRequest{
-			Title: "testTitle",
-			Body:  "testContent",
-		})
+		_, err := server.PostServer.CreatePost(ctx, mockPost)
 
 		if err != nil {
 			t.Errorf("Error: %v", err)
@@ -188,18 +181,12 @@ func TestToggleUpvote(t *testing.T) {
 	users.DeleteOne(ctx, bson.M{"username": "test.user"})
 	users.DeleteOne(ctx, bson.M{"username": "test.user2"})
 	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
-	server.UserServer.CreateUser(ctx, &gen.UserRequest{
-		Username: "test.user",
-		Password: "testPassword",
-	})
+	server.UserServer.CreateUser(ctx, mockUser)
 	server.UserServer.CreateUser(ctx, &gen.UserRequest{
 		Username: "test.user2",
 		Password: "testPassword",
 	})
-	post, err := server.PostServer.CreatePost(ctx, &gen.PostRequest{
-		Title: "testTitle",
-		Body:  "testContent",
-	})
+	post, err := server.PostServer.CreatePost(ctx, mockPost)
 
 	if err != nil {
 		t.Errorf("Error: %v", err)
