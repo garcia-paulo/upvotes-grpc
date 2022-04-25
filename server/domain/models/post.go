@@ -34,8 +34,8 @@ func NewPostResponse(post *Post) *gen.PostResponse {
 		Title:     post.Title,
 		Body:      post.Body,
 		Author:    post.Author,
-		CreatedAt: post.UpdatedAt.Time().Format(time.RFC3339),
-		UpdatedAt: post.CreatedAt.Time().Format(time.RFC3339),
+		CreatedAt: post.CreatedAt.Time().Format(time.RFC3339),
+		UpdatedAt: post.UpdatedAt.Time().Format(time.RFC3339),
 	}
 
 	response.Upvotes = append(response.Upvotes, post.Upvotes...)
