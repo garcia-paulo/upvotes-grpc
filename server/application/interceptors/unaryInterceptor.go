@@ -21,8 +21,7 @@ func NewUnaryInterceptor(tokenMaker *token.TokenMaker) *UnaryInterceptor {
 	return &UnaryInterceptor{
 		tokenMaker: tokenMaker,
 		authProtected: []string{
-			"/PostService/CreatePost",
-			"/PostService/ToggleUpvote",
+			"/PostService/*",
 		},
 	}
 }
