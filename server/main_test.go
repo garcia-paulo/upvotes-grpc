@@ -246,3 +246,50 @@ func TestToggleUpvote(t *testing.T) {
 	users.DeleteOne(ctx, bson.M{"username": "test.user2"})
 	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
 }
+
+func TestDeletePost(t *testing.T) {
+	InitTestSetup()
+	ctx := context.WithValue(context.Background(), "username", "test.user")
+	ctx2 := context.WithValue(context.Background(), "username", "test.user2")
+	users.DeleteOne(ctx, bson.M{"username": "test.user"})
+	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
+	server.UserServer.CreateUser(ctx, mockUser)
+	post, err := server.PostServer.CreatePost(ctx, mockPost)
+
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	}
+
+	t.Run("DeletePostSuccess", func(t *testing.T) {
+		_, err = server.PostServer.DeletePost(ctx, &gen.PostIdRequest{
+			PostId: post.Id,
+		})
+
+		if err != nil {
+			t.Errorf("Error: %v", err)
+		}
+	})
+
+	t.Run("DeletePostFail", func(t *testing.T) {
+		_, err = server.PostServer.DeletePost(ctx2, &gen.PostIdRequest{
+			PostId: post.Id,
+		})
+
+		if err == nil {
+			t.Errorf("Error: delete post should fail")
+		}
+	})
+
+	t.Run("DeletePostPermissionDeniedFail", func(t *testing.T) {
+		_, err = server.PostServer.DeletePost(ctx2, &gen.PostIdRequest{
+			PostId: post.Id,
+		})
+
+		if err == nil {
+			t.Errorf("Error: delete post should fail")
+		}
+	})
+
+	users.DeleteOne(ctx, bson.M{"username": "test.user"})
+	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
+}

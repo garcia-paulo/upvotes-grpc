@@ -4,3 +4,7 @@ option go_package = "github.com/garcia-paulo/upvotes-grpc/server/proto/gen";
 message Empty{
 
 }
+
+message Message{
+	string message = 1;
+}

@@ -26,6 +26,10 @@ func NewUnaryInterceptor(tokenMaker *token.TokenMaker) *UnaryInterceptor {
 	}
 }
 
+type Context struct {
+	Username string
+}
+
 func (i *UnaryInterceptor) Unary(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
 	if info.FullMethod == "/UserService/CreateUser" {
 		err := i.invalidUserInterceptor(req.(*gen.UserRequest))

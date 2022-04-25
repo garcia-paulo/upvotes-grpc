@@ -46,3 +46,12 @@ func (s *PostServer) ToggleUpvote(ctx context.Context, in *gen.PostIdRequest) (*
 
 	return response, nil
 }
+
+func (s *PostServer) DeletePost(ctx context.Context, in *gen.PostIdRequest) (*gen.Message, error) {
+	response, err := s.servicer.DeletePost(in, ctx.Value("username").(string))
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}

@@ -81,3 +81,17 @@ func (p *PostRepository) AddUpvote(post *models.Post, username string) error {
 	post.Upvotes = append(post.Upvotes, username)
 	return err
 }
+
+func (p *PostRepository) DeletePost(id primitive.ObjectID, username string) error {
+	post, err := p.GetPostById(id)
+	if err != nil {
+		return err
+	}
+
+	if post.Author != username {
+		return status.Errorf(codes.PermissionDenied, "user %s is not the author of the post", username)
+	}
+
+	_, err = p.posts.DeleteOne(p.ctx, bson.M{"_id": id})
+	return err
+}

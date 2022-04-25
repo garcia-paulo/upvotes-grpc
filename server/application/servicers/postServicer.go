@@ -72,3 +72,20 @@ func (p *PostServicer) ToggleUpvote(in *gen.PostIdRequest, username string) (*ge
 
 	return models.NewPostResponse(post), nil
 }
+
+func (p *PostServicer) DeletePost(in *gen.PostIdRequest, username string) (*gen.Message, error) {
+	postId, err := primitive.ObjectIDFromHex(in.PostId)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid post id")
+	}
+
+	err = p.postRepository.DeletePost(postId, username)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "post not found")
+
+	}
+
+	return &gen.Message{
+		Message: "post deleted",
+	}, nil
+}

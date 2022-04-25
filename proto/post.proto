@@ -18,6 +18,8 @@ message PostResponse{
 	string body = 3;
 	string author = 4;
 	repeated string upvotes = 5;
+	string createdAt = 6;
+	string updatedAt = 7;
 }
 
 message ManyPostsResponse{
@@ -28,4 +30,5 @@ service PostService{
 	rpc GetPosts(Empty) returns (ManyPostsResponse) {}
 	rpc CreatePost(PostRequest) returns (PostResponse) {}
 	rpc ToggleUpvote(PostIdRequest) returns (PostResponse) {}
+	rpc DeletePost(PostIdRequest) returns (Message) {}
 }
