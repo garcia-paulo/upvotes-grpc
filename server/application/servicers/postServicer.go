@@ -1,6 +1,8 @@
 package servicers
 
 import (
+	"time"
+
 	"github.com/garcia-paulo/upvotes-grpc/proto/gen"
 	"github.com/garcia-paulo/upvotes-grpc/server/domain/models"
 	"github.com/garcia-paulo/upvotes-grpc/server/infra/repositories"
@@ -33,6 +35,8 @@ func (p *PostServicer) CreatePost(in *gen.PostRequest, username string) (*gen.Po
 	if err := post.Validate(); err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid post: %s", err.Error())
 	}
+
+	post.CreatedAt = primitive.NewDateTimeFromTime(time.Now())
 
 	err := p.postRepository.CreatePost(post)
 	if err != nil {
@@ -81,11 +85,42 @@ func (p *PostServicer) DeletePost(in *gen.PostIdRequest, username string) (*gen.
 
 	err = p.postRepository.DeletePost(postId, username)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "post not found")
+		return nil, err
 
 	}
 
 	return &gen.Message{
 		Message: "post deleted",
 	}, nil
+}
+
+func (p *PostServicer) UpdatePost(in *gen.PostUpdateRequest, username string) (*gen.PostResponse, error) {
+	postId, err := primitive.ObjectIDFromHex(in.Id)
+	if err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid post id")
+	}
+
+	post, err := p.postRepository.GetPostById(postId)
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "post not found")
+	}
+
+	if post.Author != username {
+		return nil, status.Errorf(codes.PermissionDenied, "user %s is not the author of the post", username)
+	}
+
+	post.Title = in.Title
+	post.Body = in.Body
+	post.UpdatedAt = primitive.NewDateTimeFromTime(time.Now())
+
+	if err := post.Validate(); err != nil {
+		return nil, status.Errorf(codes.InvalidArgument, "invalid post: %s", err.Error())
+	}
+
+	err = p.postRepository.UpdatePost(post)
+	if err != nil {
+		return nil, status.Errorf(codes.Internal, "error updating post: %s", err.Error())
+	}
+
+	return models.NewPostResponse(post), nil
 }

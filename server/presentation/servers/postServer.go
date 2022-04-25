@@ -55,3 +55,12 @@ func (s *PostServer) DeletePost(ctx context.Context, in *gen.PostIdRequest) (*ge
 
 	return response, nil
 }
+
+func (s *PostServer) UpdatePost(ctx context.Context, in *gen.PostUpdateRequest) (*gen.PostResponse, error) {
+	response, err := s.servicer.UpdatePost(in, ctx.Value("username").(string))
+	if err != nil {
+		return nil, err
+	}
+
+	return response, nil
+}

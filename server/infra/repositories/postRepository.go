@@ -85,7 +85,7 @@ func (p *PostRepository) AddUpvote(post *models.Post, username string) error {
 func (p *PostRepository) DeletePost(id primitive.ObjectID, username string) error {
 	post, err := p.GetPostById(id)
 	if err != nil {
-		return err
+		return status.Errorf(codes.NotFound, "post not found")
 	}
 
 	if post.Author != username {
@@ -93,5 +93,14 @@ func (p *PostRepository) DeletePost(id primitive.ObjectID, username string) erro
 	}
 
 	_, err = p.posts.DeleteOne(p.ctx, bson.M{"_id": id})
+	if err != nil {
+		return status.Errorf(codes.NotFound, "post not found")
+	}
+
+	return nil
+}
+
+func (p *PostRepository) UpdatePost(post *models.Post) error {
+	_, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$set": post})
 	return err
 }
