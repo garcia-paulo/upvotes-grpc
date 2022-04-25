@@ -12,6 +12,13 @@ message PostIdRequest{
 	string postId = 1;
 }
 
+
+message PostUpdateRequest{
+	string id = 1;
+	string title = 2;
+	string body = 3;
+}
+
 message PostResponse{
 	string id = 1;
 	string title = 2;
@@ -31,4 +38,5 @@ service PostService{
 	rpc CreatePost(PostRequest) returns (PostResponse) {}
 	rpc ToggleUpvote(PostIdRequest) returns (PostResponse) {}
 	rpc DeletePost(PostIdRequest) returns (Message) {}
+	rpc UpdatePost(PostUpdateRequest) returns (PostResponse) {}
 }
