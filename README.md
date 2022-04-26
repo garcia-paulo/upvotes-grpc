@@ -16,6 +16,6 @@ All you'll need to do is:
 - Create a user
 - Put the returned token in the metadata (the tab at the bottom) as **"authorization"**
 
-![image](https://user-images.githubusercontent.com/79415003/165133620-e374b652-edcd-4873-b640-ff4fa53b2178.png)
+![image](https://user-images.githubusercontent.com/79415003/165298041-5def4a12-7a3e-475b-abfc-d39485a70480.png)
 
 And that's it, you'll have access to all of post methods. It's simple but I hope you'll like it.
