@@ -14,7 +14,7 @@ message PostIdRequest{
 
 
 message PostUpdateRequest{
-	string id = 1;
+	string postId = 1;
 	string title = 2;
 	string body = 3;
 }

@@ -118,6 +118,17 @@ func TestLogin(t *testing.T) {
 		}
 	})
 
+	t.Run("LoginUserNotFoundFail", func(t *testing.T) {
+		_, err := server.UserServer.Login(ctx, &gen.UserRequest{
+			Username: "test.user2",
+			Password: "",
+		})
+
+		if err == nil {
+			t.Errorf("Error: invalid user should not be accepted")
+		}
+	})
+
 	users.DeleteOne(ctx, bson.M{"username": "test.user"})
 }
 
@@ -242,6 +253,16 @@ func TestToggleUpvote(t *testing.T) {
 		}
 	})
 
+	t.Run("ToggleUpvoteInvalidPostIdFail", func(t *testing.T) {
+		_, err := server.PostServer.ToggleUpvote(ctx, &gen.PostIdRequest{
+			PostId: "",
+		})
+
+		if err == nil {
+			t.Errorf("Error: invalid post id should not be accepted")
+		}
+	})
+
 	users.DeleteOne(ctx, bson.M{"username": "test.user"})
 	users.DeleteOne(ctx, bson.M{"username": "test.user2"})
 	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
@@ -292,4 +313,66 @@ func TestDeletePost(t *testing.T) {
 
 	users.DeleteOne(ctx, bson.M{"username": "test.user"})
 	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
+}
+
+func TestUpdatePost(t *testing.T) {
+	InitTestSetup()
+	ctx := context.WithValue(context.Background(), "username", "test.user")
+	ctx2 := context.WithValue(context.Background(), "username", "test.user2")
+	users.DeleteOne(ctx, bson.M{"username": "test.user"})
+	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
+	server.UserServer.CreateUser(ctx, mockUser)
+	post, err := server.PostServer.CreatePost(ctx, mockPost)
+
+	if err != nil {
+		t.Errorf("Error: %v", err)
+	}
+
+	t.Run("UpdatePostSuccess", func(t *testing.T) {
+		_, err = server.PostServer.UpdatePost(ctx, &gen.PostUpdateRequest{
+			PostId: post.Id,
+			Title:  "Testes",
+			Body:   "Testes",
+		})
+
+		if err != nil {
+			t.Errorf("Error: %v", err)
+		}
+	})
+
+	t.Run("UpdatePostInvalidTitleFail", func(t *testing.T) {
+		_, err = server.PostServer.UpdatePost(ctx, &gen.PostUpdateRequest{
+			PostId: post.Id,
+			Title:  "",
+			Body:   "Testes",
+		})
+
+		if err == nil {
+			t.Errorf("Error: update post should fail")
+		}
+	})
+
+	t.Run("UpdatePostInvalidBodyFail", func(t *testing.T) {
+		_, err = server.PostServer.UpdatePost(ctx, &gen.PostUpdateRequest{
+			PostId: post.Id,
+			Title:  "Testes",
+			Body:   "",
+		})
+
+		if err == nil {
+			t.Errorf("Error: update post should fail")
+		}
+	})
+
+	t.Run("UpdatePostPermissionDeniedFail", func(t *testing.T) {
+		_, err = server.PostServer.UpdatePost(ctx2, &gen.PostUpdateRequest{
+			PostId: post.Id,
+			Title:  "Testes",
+			Body:   "Testes",
+		})
+
+		if err == nil {
+			t.Errorf("Error: update post should fail")
+		}
+	})
 }

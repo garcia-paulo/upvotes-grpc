@@ -94,7 +94,7 @@ func (p *PostServicer) DeletePost(in *gen.PostIdRequest, username string) (*gen.
 }
 
 func (p *PostServicer) UpdatePost(in *gen.PostUpdateRequest, username string) (*gen.PostResponse, error) {
-	postId, err := primitive.ObjectIDFromHex(in.Id)
+	postId, err := primitive.ObjectIDFromHex(in.PostId)
 	if err != nil {
 		return nil, status.Errorf(codes.InvalidArgument, "invalid post id")
 	}
