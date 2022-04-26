@@ -24,7 +24,7 @@ func NewPostServicer(postRepository *repositories.PostRepository) *PostServicer 
 func (p *PostServicer) GetPosts() (*gen.ManyPostsResponse, error) {
 	posts, err := p.postRepository.GetPosts()
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error getting posts")
+		return nil, err
 	}
 
 	return models.NewManyPostsResponse(posts), nil
@@ -40,7 +40,7 @@ func (p *PostServicer) CreatePost(in *gen.PostRequest, username string) (*gen.Po
 
 	err := p.postRepository.CreatePost(post)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating post: %s", err.Error())
+		return nil, err
 	}
 
 	return models.NewPostResponse(post), nil
@@ -54,7 +54,7 @@ func (p *PostServicer) ToggleUpvote(in *gen.PostIdRequest, username string) (*ge
 
 	post, err := p.postRepository.GetPostById(postId)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "post not found")
+		return nil, err
 	}
 
 	upvoteFound := false
@@ -71,7 +71,7 @@ func (p *PostServicer) ToggleUpvote(in *gen.PostIdRequest, username string) (*ge
 		err = p.postRepository.AddUpvote(post, username)
 	}
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error toggling upvote: %s", err.Error())
+		return nil, err
 	}
 
 	return models.NewPostResponse(post), nil
@@ -86,7 +86,6 @@ func (p *PostServicer) DeletePost(in *gen.PostIdRequest, username string) (*gen.
 	err = p.postRepository.DeletePost(postId, username)
 	if err != nil {
 		return nil, err
-
 	}
 
 	return &gen.Message{
@@ -102,11 +101,7 @@ func (p *PostServicer) UpdatePost(in *gen.PostUpdateRequest, username string) (*
 
 	post, err := p.postRepository.GetPostById(postId)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "post not found")
-	}
-
-	if post.Author != username {
-		return nil, status.Errorf(codes.PermissionDenied, "user %s is not the author of the post", username)
+		return nil, err
 	}
 
 	post.Title = in.Title
@@ -117,9 +112,9 @@ func (p *PostServicer) UpdatePost(in *gen.PostUpdateRequest, username string) (*
 		return nil, status.Errorf(codes.InvalidArgument, "invalid post: %s", err.Error())
 	}
 
-	err = p.postRepository.UpdatePost(post)
+	err = p.postRepository.UpdatePost(post, username)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error updating post: %s", err.Error())
+		return nil, err
 	}
 
 	return models.NewPostResponse(post), nil

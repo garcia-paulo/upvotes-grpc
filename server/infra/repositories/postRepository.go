@@ -32,21 +32,25 @@ func (p *PostRepository) CreatePost(post *models.Post) error {
 	}
 
 	result, err := p.posts.InsertOne(p.ctx, post)
+	if err != nil {
+		return status.Errorf(codes.Internal, "error creating post: %s", err.Error())
+	}
+
 	post.ID = result.InsertedID.(primitive.ObjectID)
-	return err
+	return nil
 }
 
 func (p *PostRepository) GetPosts() ([]*models.Post, error) {
 	posts := []*models.Post{}
 	cursor, err := p.posts.Find(p.ctx, bson.D{})
 	if err != nil {
-		return nil, err
+		return nil, status.Errorf(codes.Internal, "error getting posts: %s", err.Error())
 	}
 
 	for cursor.Next(p.ctx) {
 		var post models.Post
 		if err := cursor.Decode(&post); err != nil {
-			return nil, err
+			return nil, status.Errorf(codes.Internal, "error decoding post: %s", err.Error())
 		}
 
 		posts = append(posts, &post)
@@ -58,18 +62,25 @@ func (p *PostRepository) GetPosts() ([]*models.Post, error) {
 func (p *PostRepository) GetPostById(id primitive.ObjectID) (*models.Post, error) {
 	post := &models.Post{}
 	err := p.posts.FindOne(p.ctx, bson.M{"_id": id}).Decode(post)
-	return post, err
+	if err != nil {
+		return nil, status.Errorf(codes.NotFound, "post not found")
+	}
+
+	return post, nil
 }
 
 func (p *PostRepository) RemoveUpvote(post *models.Post, username string) error {
 	_, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$pull": bson.M{"upvotes": username}})
 	if err != nil {
-		return err
+		return status.Errorf(codes.Internal, "error removing upvote: %s", err.Error())
 	}
 
 	update, err := p.GetPostById(post.ID)
+	if err != nil {
+		return status.Errorf(codes.Internal, "error when retrieving post: %s", err.Error())
+	}
 	post.Upvotes = update.Upvotes
-	return err
+	return nil
 }
 
 func (p *PostRepository) AddUpvote(post *models.Post, username string) error {
@@ -77,9 +88,11 @@ func (p *PostRepository) AddUpvote(post *models.Post, username string) error {
 		return status.Errorf(codes.NotFound, "user with username %s not found", username)
 	}
 
-	_, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$addToSet": bson.M{"upvotes": username}})
+	if _, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$addToSet": bson.M{"upvotes": username}}); err != nil {
+		return status.Errorf(codes.Internal, "error adding upvote: %s", err.Error())
+	}
 	post.Upvotes = append(post.Upvotes, username)
-	return err
+	return nil
 }
 
 func (p *PostRepository) DeletePost(id primitive.ObjectID, username string) error {
@@ -100,7 +113,14 @@ func (p *PostRepository) DeletePost(id primitive.ObjectID, username string) erro
 	return nil
 }
 
-func (p *PostRepository) UpdatePost(post *models.Post) error {
-	_, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$set": post})
-	return err
+func (p *PostRepository) UpdatePost(post *models.Post, username string) error {
+	if post.Author != username {
+		return status.Errorf(codes.PermissionDenied, "user %s is not the author of the post", username)
+	}
+
+	if _, err := p.posts.UpdateOne(p.ctx, bson.M{"_id": post.ID}, bson.M{"$set": post}); err != nil {
+		return status.Errorf(codes.Internal, "error updating post: %s", err.Error())
+	}
+
+	return nil
 }

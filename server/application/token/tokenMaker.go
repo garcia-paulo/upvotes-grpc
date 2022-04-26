@@ -19,11 +19,7 @@ func NewTokenMaker(config *config.Config) *TokenMaker {
 }
 
 func (m *TokenMaker) CreateToken(username string) (string, error) {
-	payload, err := NewPayload(username, m.config.TokenDuration)
-	if err != nil {
-		return "", err
-	}
-
+	payload := NewPayload(username, m.config.TokenDuration)
 	return m.token.Encrypt([]byte(m.config.TokenKey), payload, nil)
 }
 

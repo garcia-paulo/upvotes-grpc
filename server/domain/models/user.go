@@ -4,6 +4,8 @@ import (
 	"github.com/garcia-paulo/upvotes-grpc/proto/gen"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"gopkg.in/validator.v2"
 )
 
@@ -24,7 +26,7 @@ func NewUser(request *gen.UserRequest) *User {
 func (u *User) Authenticate(password string) error {
 	err := bcrypt.CompareHashAndPassword([]byte(u.HashedPassword), []byte(password))
 	if err != nil {
-		return err
+		return status.Errorf(codes.Unauthenticated, "invalid password")
 	}
 	return nil
 }
@@ -32,7 +34,7 @@ func (u *User) Authenticate(password string) error {
 func HashPassword(password string) (string, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
-		return "", err
+		return "", status.Errorf(codes.Internal, "error hashing password")
 	}
 	return string(hashedPassword), nil
 }

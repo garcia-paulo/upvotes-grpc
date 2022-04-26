@@ -30,14 +30,14 @@ func (s *UserServicer) CreateUser(in *gen.UserRequest) (*gen.UserResponse, error
 
 	hashedPassword, err := models.HashPassword(in.Password)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error hashing password")
+		return nil, err
 	}
 
 	user.HashedPassword = hashedPassword
 
 	err = s.repository.CreateUser(user)
 	if err != nil {
-		return nil, status.Errorf(codes.Internal, "error creating user: %s", err.Error())
+		return nil, err
 	}
 
 	token, err := s.tokenMaker.CreateToken(user.Username)
@@ -51,11 +51,11 @@ func (s *UserServicer) CreateUser(in *gen.UserRequest) (*gen.UserResponse, error
 func (s *UserServicer) Login(in *gen.UserRequest) (*gen.UserResponse, error) {
 	user, err := s.repository.FindUserByUsername(in.Username)
 	if err != nil {
-		return nil, status.Errorf(codes.NotFound, "user with username %s not found", in.Username)
+		return nil, err
 	}
 
 	if err := user.Authenticate(in.Password); err != nil {
-		return nil, status.Errorf(codes.Unauthenticated, "invalid password")
+		return nil, err
 	}
 
 	token, err := s.tokenMaker.CreateToken(user.Username)

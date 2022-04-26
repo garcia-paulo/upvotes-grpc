@@ -25,14 +25,18 @@ func NewUserRepository(database *database.Database) *UserRepository {
 
 func (u *UserRepository) FindUserByUsername(username string) (*models.User, error) {
 	var user models.User
-	err := u.users.FindOne(u.ctx, bson.M{"username": username}).Decode(&user)
-	return &user, err
+	if err := u.users.FindOne(u.ctx, bson.M{"username": username}).Decode(&user); err != nil {
+		return nil, status.Errorf(codes.NotFound, "user with username %s not found", username)
+	}
+	return &user, nil
 }
 
 func (u *UserRepository) CreateUser(user *models.User) error {
 	if _, err := u.FindUserByUsername(user.Username); err == nil {
 		return status.Errorf(codes.AlreadyExists, "user with username %s already exists", user.Username)
 	}
-	_, err := u.users.InsertOne(u.ctx, user)
-	return err
+	if _, err := u.users.InsertOne(u.ctx, user); err != nil {
+		return status.Errorf(codes.Internal, "error creating user: %s", err.Error())
+	}
+	return nil
 }

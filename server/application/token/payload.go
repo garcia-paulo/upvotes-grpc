@@ -12,13 +12,11 @@ type Payload struct {
 	ExpiredAt time.Time `json:"expired_at"`
 }
 
-func NewPayload(username string, duration time.Duration) (*Payload, error) {
-	payload := &Payload{
+func NewPayload(username string, duration time.Duration) *Payload {
+	return &Payload{
 		Username:  username,
 		ExpiredAt: time.Now().Add(duration),
 	}
-
-	return payload, nil
 }
 
 func (p *Payload) Validate() error {
