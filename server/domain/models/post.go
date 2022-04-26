@@ -10,7 +10,7 @@ import (
 
 type Post struct {
 	ID        primitive.ObjectID `bson:"_id"`
-	Title     string             `bson:"title" validate:"min=6,max=18"`
+	Title     string             `bson:"title" validate:"min=6,max=32"`
 	Body      string             `bson:"body" validate:"max=280,nonzero"`
 	Upvotes   []string           `bson:"upvotes,omitempty"`
 	Author    string             `bson:"author" validate:"nonzero"`
