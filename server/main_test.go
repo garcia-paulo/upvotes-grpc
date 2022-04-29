@@ -375,4 +375,6 @@ func TestUpdatePost(t *testing.T) {
 			t.Errorf("Error: update post should fail")
 		}
 	})
+	users.DeleteOne(ctx, bson.M{"username": "test.user"})
+	posts.DeleteMany(ctx, bson.M{"author": "test.user"})
 }
